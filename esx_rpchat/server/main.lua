@@ -5,7 +5,13 @@
 --]]
 
 function getIdentity(source)
-	local identifier = GetPlayerIdentifiers(source)[1]
+	---------------------------------------------------------------------------------------------------------------------------
+	-- local identifier = GetPlayerIdentifiers(source)[1]
+	---------------------------------------------------------------------------------------------------------------------------
+	-- had to edit this line for new esx identity system using license: instead of steam: identifier
+	---------------------------------------------------------------------------------------------------------------------------
+	local identifier = string.gsub(GetPlayerIdentifiers(source)[2], "license:", "")
+	---------------------------------------------------------------------------------------------------------------------------
 	local result = MySQL.Sync.fetchAll("SELECT * FROM users WHERE identifier = @identifier", {['@identifier'] = identifier})
 	if result[1] ~= nil then
 		local identity = result[1]
@@ -27,7 +33,7 @@ end
  AddEventHandler('chatMessage', function(source, name, message)
       if string.sub(message, 1, string.len("/")) ~= "/" then
           local name = getIdentity(source)
-		TriggerClientEvent("sendProximityMessageMe", -1, source, name.firstname, message)
+		-- TriggerClientEvent("sendProximityMessageMe", -1, source, name.firstname, message)
       end
       CancelEvent()
   end)
@@ -54,7 +60,7 @@ end)
     local playerName = GetPlayerName(source)
     local msg = rawCommand:sub(6)
     local name = getIdentity(source)
-    fal = name.firstname .. " " .. name.lastname
+    fal = name.firstname .. "_" .. name.lastname
     TriggerClientEvent('chat:addMessage', -1, {
         template = '<div style="padding: 0.5vw; margin: 0.5vw; background-color: rgba(28, 160, 242, 0.6); border-radius: 3px;"><i class="fab fa-twitter"></i> @{0}:<br> {1}</div>',
         args = { fal, msg }
@@ -90,7 +96,7 @@ end, false)
 
     TriggerClientEvent('chat:addMessage', -1, {
         template = '<div style="padding: 0.5vw; margin: 0.5vw; background-color: rgba(41, 41, 41, 0.6); border-radius: 3px;"><i class="fas fa-globe"></i> {0}:<br> {1}</div>',
-        args = { playerName, msg }
+        args = { playerName.." ("..name.firstname.." "..name.lastname..")", msg }
     })
 end, false)
 
